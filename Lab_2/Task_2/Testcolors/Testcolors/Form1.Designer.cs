@@ -179,6 +179,7 @@ namespace Testcolors
             this.Controls.Add(this.pictureBoxRed);
             this.Name = "Form1";
             this.Text = "Form1";
+this.FormBorderStyle=System.Windows.Forms.FormBorderStyle.FixedSingle;
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxRed)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxGreen)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxBlue)).EndInit();
