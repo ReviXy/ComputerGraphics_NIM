@@ -57,27 +57,27 @@ namespace Testcolors
             // 
             // pictureBoxRed
             // 
-            this.pictureBoxRed.Location = new System.Drawing.Point(244, 12);
+            this.pictureBoxRed.Location = new System.Drawing.Point(201, 12);
             this.pictureBoxRed.Name = "pictureBoxRed";
-            this.pictureBoxRed.Size = new System.Drawing.Size(220, 210);
+            this.pictureBoxRed.Size = new System.Drawing.Size(179, 210);
             this.pictureBoxRed.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBoxRed.TabIndex = 0;
             this.pictureBoxRed.TabStop = false;
             // 
             // pictureBoxGreen
             // 
-            this.pictureBoxGreen.Location = new System.Drawing.Point(244, 234);
+            this.pictureBoxGreen.Location = new System.Drawing.Point(201, 234);
             this.pictureBoxGreen.Name = "pictureBoxGreen";
-            this.pictureBoxGreen.Size = new System.Drawing.Size(220, 210);
+            this.pictureBoxGreen.Size = new System.Drawing.Size(179, 210);
             this.pictureBoxGreen.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBoxGreen.TabIndex = 1;
             this.pictureBoxGreen.TabStop = false;
             // 
             // pictureBoxBlue
             // 
-            this.pictureBoxBlue.Location = new System.Drawing.Point(244, 460);
+            this.pictureBoxBlue.Location = new System.Drawing.Point(201, 460);
             this.pictureBoxBlue.Name = "pictureBoxBlue";
-            this.pictureBoxBlue.Size = new System.Drawing.Size(220, 210);
+            this.pictureBoxBlue.Size = new System.Drawing.Size(179, 210);
             this.pictureBoxBlue.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBoxBlue.TabIndex = 2;
             this.pictureBoxBlue.TabStop = false;
@@ -90,7 +90,7 @@ namespace Testcolors
             this.chartRed.ChartAreas.Add(chartArea1);
             legend1.Name = "Legend1";
             this.chartRed.Legends.Add(legend1);
-            this.chartRed.Location = new System.Drawing.Point(470, 12);
+            this.chartRed.Location = new System.Drawing.Point(386, 12);
             this.chartRed.Name = "chartRed";
             this.chartRed.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.None;
             this.chartRed.PaletteCustomColors = new System.Drawing.Color[] {
@@ -102,7 +102,7 @@ namespace Testcolors
             series1.Name = "Series1";
             series1.YValuesPerPoint = 2;
             this.chartRed.Series.Add(series1);
-            this.chartRed.Size = new System.Drawing.Size(1393, 210);
+            this.chartRed.Size = new System.Drawing.Size(1600, 210);
             this.chartRed.TabIndex = 3;
             this.chartRed.Text = "chart1";
             // 
@@ -114,7 +114,7 @@ namespace Testcolors
             this.chartGreen.ChartAreas.Add(chartArea2);
             legend2.Name = "Legend1";
             this.chartGreen.Legends.Add(legend2);
-            this.chartGreen.Location = new System.Drawing.Point(470, 234);
+            this.chartGreen.Location = new System.Drawing.Point(386, 234);
             this.chartGreen.Name = "chartGreen";
             this.chartGreen.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.None;
             this.chartGreen.PaletteCustomColors = new System.Drawing.Color[] {
@@ -126,7 +126,7 @@ namespace Testcolors
             series2.Name = "Series1";
             series2.YValuesPerPoint = 2;
             this.chartGreen.Series.Add(series2);
-            this.chartGreen.Size = new System.Drawing.Size(1393, 210);
+            this.chartGreen.Size = new System.Drawing.Size(1600, 210);
             this.chartGreen.TabIndex = 4;
             this.chartGreen.Text = "chart2";
             // 
@@ -139,7 +139,7 @@ namespace Testcolors
             legend3.LegendStyle = System.Windows.Forms.DataVisualization.Charting.LegendStyle.Column;
             legend3.Name = "Legend1";
             this.chartBlue.Legends.Add(legend3);
-            this.chartBlue.Location = new System.Drawing.Point(470, 460);
+            this.chartBlue.Location = new System.Drawing.Point(386, 460);
             this.chartBlue.Name = "chartBlue";
             this.chartBlue.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.None;
             this.chartBlue.PaletteCustomColors = new System.Drawing.Color[] {
@@ -152,7 +152,7 @@ namespace Testcolors
             series3.Name = "Series1";
             series3.YValuesPerPoint = 2;
             this.chartBlue.Series.Add(series3);
-            this.chartBlue.Size = new System.Drawing.Size(1393, 210);
+            this.chartBlue.Size = new System.Drawing.Size(1600, 210);
             this.chartBlue.TabIndex = 5;
             this.chartBlue.Text = "chart3";
             // 
@@ -160,7 +160,7 @@ namespace Testcolors
             // 
             this.pictureBoxTrue.Location = new System.Drawing.Point(1, 234);
             this.pictureBoxTrue.Name = "pictureBoxTrue";
-            this.pictureBoxTrue.Size = new System.Drawing.Size(237, 210);
+            this.pictureBoxTrue.Size = new System.Drawing.Size(194, 210);
             this.pictureBoxTrue.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBoxTrue.TabIndex = 6;
             this.pictureBoxTrue.TabStop = false;
@@ -168,7 +168,6 @@ namespace Testcolors
             // Form1
             // 
             this.ClientSize = new System.Drawing.Size(1920, 720);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Controls.Add(this.pictureBoxTrue);
             this.Controls.Add(this.chartBlue);
             this.Controls.Add(this.chartGreen);
@@ -176,6 +175,7 @@ namespace Testcolors
             this.Controls.Add(this.pictureBoxBlue);
             this.Controls.Add(this.pictureBoxGreen);
             this.Controls.Add(this.pictureBoxRed);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "Form1";
             this.Text = "Form1";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxRed)).EndInit();

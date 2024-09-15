@@ -19,7 +19,7 @@ namespace Testcolors
         {
             InitializeComponent();
             // Загрузка и отображение изображения
-            Image image = Image.FromFile(""); 
+            Image image = Image.FromFile("C:\\Users\\kosth\\OneDrive\\Изображения\\Saved Pictures\\GAKmdgA.jpeg"); 
             bitmap = new Bitmap(image);
 
             // Отображение изображения в каналах
