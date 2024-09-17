@@ -66,7 +66,7 @@ namespace WindowsFormsApp1
             float _h;
             float _s;
             float _v;
-            public float H { get { return _h; } set { if (value > 360) value = value % 360; while (value < 0) value += 360; _h = value; } }
+            public float H { get { return _h; } set { if (value > 360) value %= 360; while (value < 0) value += 360; _h = value; } }
             public float S { get { return _s; } set { if (value > 1) value = 1; if (value < 0) value = 0; _s = value; } }
             public float V { get { return _v; } set { if (value > 1) value = 1; if (value < 0) value = 0; _v = value; } }
         }
@@ -101,10 +101,6 @@ namespace WindowsFormsApp1
             else res.S = 1 - (min / max);
 
             res.V = max;
-
-
-            float asd = c.GetHue();
-            float asdad = c.GetSaturation();
 
             return res;
         }

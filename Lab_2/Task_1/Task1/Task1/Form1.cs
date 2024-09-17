@@ -78,8 +78,6 @@ namespace Task1
             }
 
             pictureBox4.Image = bitmap3;
-
-            //DisplayHistogram(chartRed, GetHistogram(bitmap, 'R'));
         }
 
     }
