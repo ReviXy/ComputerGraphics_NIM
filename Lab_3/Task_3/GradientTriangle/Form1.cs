@@ -118,11 +118,11 @@ namespace GradientTriangle
             if (inc13 > inc12)
                 (inc13, inc12) = (inc12, inc13);
 
+            int left, right;
+            (left, right) = points[1].X < Interpolation(points[0].Y, points[0].X, points[2].Y, points[2].X, points[1].Y) ? (1, 2) : (2, 1);
+
             for (int i = points[0].Y; i < points[1].Y; i++)
             {
-                int left, right;
-                (left, right) = points[1].X < points[2].X ? (1, 2) : (2, 1);
-
                 int cLeftR = Interpolation(points[0].Y, colors[0].R, points[left].Y, colors[left].R, i);
                 int cLeftG = Interpolation(points[0].Y, colors[0].G, points[left].Y, colors[left].G, i);
                 int cLeftB = Interpolation(points[0].Y, colors[0].B, points[left].Y, colors[left].B, i);
@@ -151,11 +151,10 @@ namespace GradientTriangle
             if(_inc13 < inc23) 
                 (_inc13, inc23) = (inc23, _inc13);
 
+            (left, right) = Interpolation(points[0].Y, points[0].X, points[2].Y, points[2].X, points[1].Y) < points[1].X ? (0, 1) : (1, 0);
+
             for (int i = points[1].Y; i < points[2].Y; i++)
             {
-                int left, right;
-                (left, right) = points[0].X < points[1].X ? (0, 1) : (1,0);
-
                 int cLeftR = Interpolation(points[2].Y, colors[2].R, points[left].Y, colors[left].R, i);
                 int cLeftG = Interpolation(points[2].Y, colors[2].G, points[left].Y, colors[left].G, i);
                 int cLeftB = Interpolation(points[2].Y, colors[2].B, points[left].Y, colors[left].B, i);
