@@ -23,8 +23,6 @@ namespace WindowsFormsApp1
         public Form1()
         {
             InitializeComponent();
-            DoubleBuffered = true;
-
             bm = new Bitmap(850, 600);
             pictureBox1.Image = bm;
             Clear();
@@ -69,13 +67,11 @@ namespace WindowsFormsApp1
             {
                 points.Clear();
                 Clear();
-                pictureBox1.Click += pictureBox1_Click_1;
             }
             else if (radioButton2.Checked)
             {
                 points.Clear();
                 Clear();
-                pictureBox1.Click += pictureBox1_Click_1;
             }
         }
         void Bresenham(int xstart, int ystart, int xend, int yend)
@@ -90,7 +86,7 @@ namespace WindowsFormsApp1
             int xi = xstart;
             int yi = ystart;
             int step = 1;
-            int di = 2 * (dy - dx);
+            int gradient = 2 * (dy - dx);
             if (dx == 0 || Math.Abs(dy / (double)dx) > 1)
             {
                 if (dy / (double)dx < 0)
@@ -98,21 +94,19 @@ namespace WindowsFormsApp1
                     xi = xend;
                     step = -1;
                     dy = -dy;
-                    int temp = ystart;
-                    ystart = yend;
-                    yend = temp;
+                    Swap(ref ystart, ref yend);
                 }
                 for (yi = ystart; yi <= yend; yi++)
                 {
                     bm.SetPixel(xi, yi, Color.Black);
-                    if (di >= 0)
+                    if (gradient >= 0)
                     {
                         xi += step;
-                        di += 2 * (dx - dy);
+                        gradient += 2 * (dx - dy);
                     }
                     else
                     {
-                        di += 2 * dx;
+                        gradient += 2 * dx;
                     }
                 }
             }
@@ -126,14 +120,14 @@ namespace WindowsFormsApp1
                 for (xi = xstart; xi <= xend; xi++)
                 {
                     bm.SetPixel(xi, yi, Color.Black);
-                    if (di >= 0)
+                    if (gradient >= 0)
                     {
                         yi += step;
-                        di += 2 * (dy - dx);
+                        gradient += 2 * (dy - dx);
                     }
                     else
                     {
-                        di += 2 * dy;
+                        gradient += 2 * dy;
                     }
                 }
             }
@@ -176,9 +170,7 @@ namespace WindowsFormsApp1
                 {
                     xi = xend;
                     step = -1;
-                    int temp = ystart;
-                    ystart = yend;
-                    yend = temp;
+                    Swap(ref ystart, ref yend);
                 }
 
                 for (yi = ystart; yi <= yend; yi += 1)
