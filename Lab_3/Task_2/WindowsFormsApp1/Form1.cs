@@ -23,7 +23,6 @@ namespace WindowsFormsApp1
         public Form1()
         {
             InitializeComponent();
-            DoubleBuffered = true;
 
             bm = new Bitmap(850, 600);
             pictureBox1.Image = bm;
@@ -68,14 +67,14 @@ namespace WindowsFormsApp1
             if (radioButton1.Checked)
             {
                 points.Clear();
-                Clear();
-                pictureBox1.Click += pictureBox1_Click_1;
+                //Clear();
+                //pictureBox1.Click += pictureBox1_Click_1;
             }
             else if (radioButton2.Checked)
             {
                 points.Clear();
-                Clear();
-                pictureBox1.Click += pictureBox1_Click_1;
+                //Clear();
+                //pictureBox1.Click += pictureBox1_Click_1;
             }
         }
         void Bresenham(int xstart, int ystart, int xend, int yend)
@@ -91,7 +90,7 @@ namespace WindowsFormsApp1
             int yi = ystart;
             int step = 1;
             int di = 2 * (dy - dx);
-            if (dx == 0 || Math.Abs(dy / (double)dx) > 1)
+            if (dx == 0 || Math.Abs(dy ) > Math.Abs(dx))
             {
                 if (dy / (double)dx < 0)
                 {

@@ -31,7 +31,6 @@ namespace WindowsFormsApp1
         public Form1()
         {
             InitializeComponent();
-            DoubleBuffered = true;
 
             bm = new Bitmap(850, 600);
             pictureBox1.Image = bm;
@@ -127,7 +126,7 @@ namespace WindowsFormsApp1
             int x = bmFill.Width / 2 + (p.X - origin.X);
             int y = bmFill.Height / 2 + (p.Y - origin.Y);
             if (x >= bmFill.Width) x %= bmFill.Width;
-            if (y >= bmFill.Width) y %= bmFill.Height;
+            if (y >= bmFill.Height) y %= bmFill.Height;
             while (x < 0) x += bmFill.Width;
             while (y < 0) y += bmFill.Height;
             return new Point(x, y);

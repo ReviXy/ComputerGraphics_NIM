@@ -40,9 +40,9 @@ namespace GradientTriangle
             hsv.S = 1;
             hsv.V = 1;
             colors.Add(HSV_To_RGB(hsv));
-            hsv.H += r.Next(60, 120);
+            hsv.H += r.Next(80, 120);
             colors.Add(HSV_To_RGB(hsv));
-            hsv.H += r.Next(60, 120);
+            hsv.H += r.Next(80, 120);
             colors.Add(HSV_To_RGB(hsv));
         }
 
@@ -148,7 +148,7 @@ namespace GradientTriangle
                 x2 = points[1].X;
             }
 
-            if(_inc13 < inc23) 
+           if(_inc13 < inc23) 
                 (_inc13, inc23) = (inc23, _inc13);
 
             (left, right) = Interpolation(points[0].Y, points[0].X, points[2].Y, points[2].X, points[1].Y) < points[1].X ? (0, 1) : (1, 0);
