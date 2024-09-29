@@ -129,6 +129,7 @@ namespace WindowsFormsApp1
                         mode = Mode.Idle;
                         clearButton.Enabled = true;
                         SetModeButtons(true);
+                        outputTextBox.Text = "";
                         DrawPolygons();
                     }
                     break;
@@ -177,7 +178,7 @@ namespace WindowsFormsApp1
                             if (res > 0) str = "Точка слева от ребра.";
                             else if (res < 0) str = "Точка справа от ребра.";
                             else str = "Точка на ребре.";
-                            str += "Нажмите на экран, чтобы продолжить.";
+                            str += " Нажмите на экран, чтобы продолжить.";
                             outputTextBox.Text = str;
 
                             break;
@@ -255,9 +256,10 @@ namespace WindowsFormsApp1
 
                         if (res.X >= Math.Min(a.X, b.X) && res.X <= Math.Max(a.X, b.X) && res.Y >= Math.Min(a.Y, b.Y) && res.Y <= Math.Max(a.Y, b.Y)
                             && res.X >= Math.Min(c.X, d.X) && res.X <= Math.Max(c.X, d.X) && res.Y >= Math.Min(c.Y, d.Y) && res.Y <= Math.Max(c.Y, d.Y)) 
-                            outputTextBox.Text = $"Точка пересечения - ({res.X}, {res.Y}). Нажмите на экран, чтобы продолжить.";
+                            outputTextBox.Text = $"Точка пересечения - ({res.X}, {res.Y}).";
                         else outputTextBox.Text = $"Рёбра не пересекаются.";
                         qwe:
+                        outputTextBox.Text += " Нажмите на экран, чтобы продолжить.";
                         intFlag++;
                     }
                     else if (intFlag == 5)
@@ -274,6 +276,19 @@ namespace WindowsFormsApp1
                         DrawPolygons();
                     }
                     break;
+                case Mode.Scaling_Relative_To_Point:
+                    if (pointFlag)
+                    {
+                        tempPoint = e.Location;
+                        pointFlag = false;
+
+                        polygonSelectDropDown.Enabled = true;
+                        inputTextBox.Enabled = true;
+                        applyButton.Enabled = true;
+                        outputTextBox.Text = "Выберите полигон и коэфициент масштабирования. После чего нажмите Apply.";
+                    }
+                    break;
+
                 default: break;
             }
         }
@@ -339,8 +354,8 @@ namespace WindowsFormsApp1
                         return;
                     }
                     Point tempP = new Point();
-                    tempP.X = PolygonCentre(polygons[polygonSelectDropDown.SelectedIndex - 1]).X;
-                    tempP.Y = PolygonCentre(polygons[polygonSelectDropDown.SelectedIndex - 1]).Y;
+                    tempP.X = PolygonCenter(polygons[polygonSelectDropDown.SelectedIndex - 1]).X;
+                    tempP.Y = PolygonCenter(polygons[polygonSelectDropDown.SelectedIndex - 1]).Y;
                     for (int i = 0; i < polygons[polygonSelectDropDown.SelectedIndex - 1].Count; i++)
                         polygons[polygonSelectDropDown.SelectedIndex - 1][i] = RotatePoint(polygons[polygonSelectDropDown.SelectedIndex - 1][i], tempP, turn);
                     clearButton.Enabled = true;
@@ -385,7 +400,7 @@ namespace WindowsFormsApp1
                     }
 
                     if (cnt % 2 == 0)
-                        outputTextBox.Text = "Точка не лежит внутри полигона. Нажмите на экран, чтобы продолжить.";
+                        outputTextBox.Text = "Точка не лежит внутри полигона.";
                     else
                     {
                         Point b = new Point(tempPoint.X - l[0].X, tempPoint.Y - l[0].Y);
@@ -405,11 +420,65 @@ namespace WindowsFormsApp1
                         if (res) outputTextBox.Text = "Точка лежит внутри выпуклого полигона.";
                         else outputTextBox.Text = "Точка лежит внутри вогнутого полигона.";
                     }
-
+                    outputTextBox.Text += " Нажмите на экран, чтобы продолжить.";
                     polygonSelectDropDown.Enabled = false;
                     applyButton.Enabled = false;
 
                     intFlag = 2;
+                    break;
+
+                case Mode.Scaling_Relative_To_Point:
+                    float k1 = 0f;
+                    if (polygonSelectDropDown.SelectedIndex == 0 || !float.TryParse(inputTextBox.Text, out k1))
+                    {
+                        outputTextBox.Text = "Ошибка входных данных";
+                        return;
+                    }
+                    for (int i = 0; i < polygons[polygonSelectDropDown.SelectedIndex - 1].Count; i++)
+                        polygons[polygonSelectDropDown.SelectedIndex - 1][i] = ScalePoint(polygons[polygonSelectDropDown.SelectedIndex - 1][i], tempPoint, k1);
+
+
+                    mode = Mode.Idle;
+                    clearButton.Enabled = true;
+                    SetModeButtons(true);
+
+                    polygonSelectDropDown.SelectedIndex = 0;
+                    polygonSelectDropDown.Enabled = false;
+                    inputTextBox.Text = "";
+                    inputTextBox.Enabled = false;
+                    applyButton.Enabled = false;
+                    outputTextBox.Text = "";
+
+                    DrawPolygons();
+                    pointFlag = true;
+                    break;
+
+                case Mode.Scaling_Relative_To_Center:
+                    float k = 0f;
+                    if (polygonSelectDropDown.SelectedIndex == 0 || !float.TryParse(inputTextBox.Text, out k))
+                    {
+                        outputTextBox.Text = "Ошибка входных данных";
+                        return;
+                    }
+
+                    Point center = PolygonCenter(polygons[polygonSelectDropDown.SelectedIndex - 1]);
+
+                    for (int i = 0; i < polygons[polygonSelectDropDown.SelectedIndex - 1].Count; i++)
+                        polygons[polygonSelectDropDown.SelectedIndex - 1][i] = ScalePoint(polygons[polygonSelectDropDown.SelectedIndex - 1][i], center, k);
+
+
+                    mode = Mode.Idle;
+                    clearButton.Enabled = true;
+                    SetModeButtons(true);
+
+                    polygonSelectDropDown.SelectedIndex = 0;
+                    polygonSelectDropDown.Enabled = false;
+                    inputTextBox.Text = "";
+                    inputTextBox.Enabled = false;
+                    applyButton.Enabled = false;
+                    outputTextBox.Text = "";
+
+                    DrawPolygons();
                     break;
 
                 default: break;
@@ -421,6 +490,7 @@ namespace WindowsFormsApp1
             mode = Mode.Create_Polygon;
             clearButton.Enabled = false;
             SetModeButtons(false);
+            outputTextBox.Text = "Поставьте несколько точек левой кнопкой мыши. Затем нажмите правой кнопкой мыши.";
         }
 
         private void movePolygonButton_Click(object sender, EventArgs e)
@@ -479,12 +549,37 @@ namespace WindowsFormsApp1
 
         private void scaleRelativeToPointButton_Click(object sender, EventArgs e)
         {
+            if (polygons.Count > 0)
+            {
+                mode = Mode.Scaling_Relative_To_Point;
+                clearButton.Enabled = false;
+                SetModeButtons(false);
 
+                outputTextBox.Text = "Выберите точку, относительно которой будет выполняться масштабирование.";
+            }
+            else
+            {
+                outputTextBox.Text = "Нет полигонов.";
+            }
         }
 
         private void scaleRelativeToCenterButton_Click(object sender, EventArgs e)
         {
+            if (polygons.Count > 0)
+            {
+                mode = Mode.Scaling_Relative_To_Center;
+                clearButton.Enabled = false;
+                SetModeButtons(false);
+                polygonSelectDropDown.Enabled = true;
+                inputTextBox.Enabled = true;
+                applyButton.Enabled = true;
 
+                outputTextBox.Text = "Выберите полигон и коэфициент масштабирования. После чего нажмите Apply.";
+            }
+            else
+            {
+                outputTextBox.Text = "Нет полигонов.";
+            }
         }
 
         private void findIntersectionButton_Click(object sender, EventArgs e)
@@ -599,11 +694,23 @@ namespace WindowsFormsApp1
             double[] resultVector = Multiplydouble(Matrix, offsetVector);
             return new Point((int)resultVector[0], (int)resultVector[1]);
         }
-        private Point PolygonCentre(List<Point> polygon)
+        private Point PolygonCenter(List<Point> polygon)
         {
             int sumX = 0, sumY = 0;
             foreach (Point p in polygon) { sumX += p.X; sumY += p.Y; }
             return new Point(sumX / polygon.Count, sumY / polygon.Count);
+        }
+        private Point ScalePoint(Point polygonpoint, Point randompoint, float k)
+        {
+            int[] offsetVector = new int[3] { polygonpoint.X - randompoint.X, polygonpoint.Y - randompoint.Y, 1 };
+            double[][] Matrix = new double[3][]
+            {
+                new double[3] {  k,   0, 0 },
+                new double[3] { 0,   k, 0 },
+                new double[3] { 0, 0, 1 }
+            };
+            double[] resultVector = Multiplydouble(Matrix, offsetVector);
+            return new Point((int)resultVector[0] + randompoint.X, (int)resultVector[1] + randompoint.Y);
         }
     }
 }
