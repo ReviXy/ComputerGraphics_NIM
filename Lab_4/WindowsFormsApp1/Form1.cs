@@ -696,9 +696,20 @@ namespace WindowsFormsApp1
         }
         private Point PolygonCenter(List<Point> polygon)
         {
-            int sumX = 0, sumY = 0;
-            foreach (Point p in polygon) { sumX += p.X; sumY += p.Y; }
-            return new Point(sumX / polygon.Count, sumY / polygon.Count);
+            int a = 0;
+            int cx = 0;
+            int cy = 0;
+
+            for (int i = 0; i < polygon.Count; i++)
+            {
+                int temp = polygon[i].X * polygon[(i + 1) % polygon.Count].Y - polygon[(i + 1) % polygon.Count].X * polygon[i].Y;
+                a += temp;
+                cx += (polygon[i].X + polygon[(i + 1) % polygon.Count].X) * temp;
+                cy += (polygon[i].Y + polygon[(i + 1) % polygon.Count].Y) * temp;
+            }
+            a /= 2;
+
+            return new Point(cx / (6 * a), cy / (6 * a));
         }
         private Point ScalePoint(Point polygonpoint, Point randompoint, float k)
         {
