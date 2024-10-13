@@ -591,11 +591,6 @@ namespace WindowsFormsApp1
             outputTextBox.Text = "Постройте 2 отрезка.";
         }
 
-        int Interpolation(int x0, int y0, int x1, int y1, int x)
-        {
-            return (int)(y0 + (float)(y1 - y0) * (x - x0) / (x1 - x0));
-        }
-
         private void convexityCheckButton_Click(object sender, EventArgs e)
         {
             if (polygons.Count > 0)
@@ -644,6 +639,7 @@ namespace WindowsFormsApp1
         {
             Clear();
         }
+
         private int[] Multiplyint(int[][] Matrix, int[] array)
         {
             int[] resultVector = new int[3];
@@ -654,6 +650,7 @@ namespace WindowsFormsApp1
             }
             return resultVector;
         }
+
         private double[] Multiplydouble(double[][] Matrix, int[] array)
         {
             double[] resultVector = new double[3];
@@ -664,6 +661,7 @@ namespace WindowsFormsApp1
             }
             return resultVector;
         }
+
         private Point Movepoint(Point polygonpoint, int dx, int dy)
         {
             int[][] Matrix = new int[3][]
@@ -676,6 +674,7 @@ namespace WindowsFormsApp1
             int[] resultVector = Multiplyint(Matrix, offsetVector);
             return new Point((int)resultVector[0], (int)resultVector[1]);
         }
+
         private Point RotatePoint(Point polygonpoint, Point PointofRotate, int rotateAngle)
         {
             double pointA, pointB;
@@ -687,13 +686,14 @@ namespace WindowsFormsApp1
             int[] offsetVector = new int[3] { polygonpoint.X, polygonpoint.Y, 1 };
             double[][] Matrix = new double[3][]
             {
-                new double[3] {  Math.Cos(angle),   Math.Sin(angle), 0 },
-                new double[3] { -Math.Sin(angle),   Math.Cos(angle), 0 },
-                new double[3] { pointA, pointB, 1 } 
+                new double[3] {  Math.Cos(angle),   Math.Sin(angle),    0 },
+                new double[3] { -Math.Sin(angle),   Math.Cos(angle),    0 },
+                new double[3] { pointA,             pointB,             1 } 
             };
             double[] resultVector = Multiplydouble(Matrix, offsetVector);
             return new Point((int)resultVector[0], (int)resultVector[1]);
         }
+
         private Point PolygonCenter(List<Point> polygon)
         {
             int a = 0;
@@ -711,17 +711,22 @@ namespace WindowsFormsApp1
 
             return new Point(cx / (6 * a), cy / (6 * a));
         }
+
         private Point ScalePoint(Point polygonpoint, Point randompoint, float k)
         {
-            int[] offsetVector = new int[3] { polygonpoint.X - randompoint.X, polygonpoint.Y - randompoint.Y, 1 };
+
+            float pointA = (1 - k) * randompoint.X;
+            float pointB = (1 - k) * randompoint.Y;
+
+            int[] offsetVector = new int[3] { polygonpoint.X , polygonpoint.Y, 1 };
             double[][] Matrix = new double[3][]
             {
-                new double[3] {  k,   0, 0 },
-                new double[3] { 0,   k, 0 },
-                new double[3] { 0, 0, 1 }
+                new double[3] { k,  0,  0 },
+                new double[3] { 0,  k,  0 },
+                new double[3] { pointA,  pointB,  1 }
             };
             double[] resultVector = Multiplydouble(Matrix, offsetVector);
-            return new Point((int)resultVector[0] + randompoint.X, (int)resultVector[1] + randompoint.Y);
+            return new Point((int)resultVector[0], (int)resultVector[1]);
         }
     }
 }
