@@ -1,0 +1,4 @@
+YF 0 60
+F->F
+X->YF+XF+Y
+Y->XF-YF-X

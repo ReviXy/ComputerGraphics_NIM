@@ -18,17 +18,17 @@ namespace Fractal
             public string InitialAxiom;
             public float InitialAngle;
             public float Angle;
-            public int Depth;
-            public float DeviationProportion;
+            //public int Depth;
+            //public float DeviationProportion;
             public Dictionary<char, string> Rules;
 
-            public L_System(string InitialAxiom, float InitialAngle, float Angle, int Depth, float DeviationProportion, Dictionary<char, string> Rules)
+            public L_System(string InitialAxiom, float InitialAngle, float Angle, Dictionary<char, string> Rules)
             {
                 this.InitialAxiom = InitialAxiom;
                 this.InitialAngle = InitialAngle;
                 this.Angle = Angle;
-                this.Depth = Depth;
-                this.DeviationProportion = DeviationProportion;
+                //this.Depth = 0;
+                //this.DeviationProportion = 0;
                 this.Rules = Rules;
             }
 
@@ -43,8 +43,8 @@ namespace Fractal
             l_System.InitialAxiom = s[0];
             l_System.InitialAngle = float.Parse(s[1]);
             l_System.Angle = float.Parse(s[2]);
-            l_System.Depth = int.Parse(s[3]);
-            l_System.DeviationProportion = float.Parse(s[4]);
+            //l_System.Depth = int.Parse(s[3]);
+            //l_System.DeviationProportion = float.Parse(s[4]);
 
             Dictionary<char, string> rules = new Dictionary<char, string>();
             for (int i = 1; i < file.Length; i++)
@@ -72,38 +72,17 @@ namespace Fractal
 
             Dictionary<char, string> rules = new Dictionary<char, string>();
 
-            //rules.Add('F', "F-F++F-F");
-            //L_System test = new L_System("F++F++F", 0, 60, 4, 0, rules);
+            //L_System l_system = Read_L_System("island.txt");
+            //int depth = 3;
+            //float deviationProportion = 0;
+            //List<FractalPoint> fractal = GetFractal(l_system, depth, deviationProportion);
+            //DrawFractal(fractal, this.Width, this.Height, 200);
 
-
-            //rules.Add('F', "F");
-            //rules.Add('X', "X+YF++YF-FX--FXFX-YF+");
-            //rules.Add('Y', "-FX+YFYF++YF+FX--FX-Y");
-            //L_System test = new L_System("XF", 0, 60, 5, 0, rules);
-
-
-            //rules.Add('F', "FF");
-            //rules.Add('X', "F[+X]F[-X]+X");
-            //L_System test = new L_System("X", -90, 25, 6, 0.3f, rules);
-
-            //rules.Add('F', "F");
-            //rules.Add('X', "X+YF+");
-            //rules.Add('Y', "-FX-Y");
-            //L_System test = new L_System("X", 0, 90, 10, 0, rules);
-
-            //rules.Add('F', "F");
-            //rules.Add('X', "F[@[-X]+X]");
-            //L_System test = new L_System("X", -90, 30, 10, 0.6f, rules);
-
-            //List<TreeFractalPoint> fractal = GetTreeFractal(test, 1, 20);
-            //DrawTreeFractal(fractal, this.Width, this.Height, 200, 2, 10, Color.SaddleBrown, Color.LimeGreen);
-
-            L_System l_system = Read_L_System("snowflake.txt");
-            List<FractalPoint> fractal = GetFractal(l_system);
-            DrawFractal(fractal, this.Width, this.Height, 200);
-
-            //List<TreeFractalPoint> fractal = GetTreeFractal(l_system, 1, 20);
-            //DrawTreeFractal(fractal, this.Width, this.Height, 200, 2, 10, Color.SaddleBrown, Color.LimeGreen);
+            L_System l_system = Read_L_System("tree.txt");
+            int depth = 11;
+            float deviationProportion = 0.8f;
+            List<TreeFractalPoint> fractal = GetTreeFractal(l_system, depth, deviationProportion, 1, 20);
+            DrawTreeFractal(fractal, this.Width, this.Height, 200, 2, 10, Color.SaddleBrown, Color.LimeGreen);
         }
 
         struct FractalPoint
@@ -166,7 +145,7 @@ namespace Fractal
 
         }
 
-        List<FractalPoint> GetFractal(L_System l)
+        List<FractalPoint> GetFractal(L_System l, int maxDepth, float deviationProportion)
         {
             float length = 10;
             List<FractalPoint> res = new List<FractalPoint>();
@@ -176,14 +155,14 @@ namespace Fractal
             float curAngle = l.InitialAngle;
             Stack<((float X, float Y) p, float angle)> stateStack = new Stack<((float X, float Y) p, float angle)>();
 
-            string s = GetFractalString(l.InitialAxiom, l.Depth, l.Rules);
+            string s = GetFractalString(l.InitialAxiom, maxDepth, l.Rules);
             int cnt = 0;
-            int deviation = (int)(l.DeviationProportion * l.Angle);
+            int deviation = (int)(deviationProportion * l.Angle);
             
             foreach (char c in s)
             {
-                if (c == '+') curAngle += l.Angle + r.Next(-deviation, deviation);
-                else if (c == '-') curAngle -= l.Angle + r.Next(-deviation, deviation);
+                if (c == '+') curAngle += l.Angle - r.Next(0, deviation);
+                else if (c == '-') curAngle -= l.Angle - r.Next(0, deviation);
                 else if (c == '[') stateStack.Push((curPoint, curAngle));
                 else if (c == ']') { 
                     ((float X, float Y) p, float angle) temp = stateStack.Pop(); 
@@ -256,7 +235,7 @@ namespace Fractal
 
         }
 
-        List<TreeFractalPoint> GetTreeFractal(L_System l, float minLength, float maxLength)
+        List<TreeFractalPoint> GetTreeFractal(L_System l, int maxDepth, float deviationProportion, float minLength, float maxLength)
         {
             float length = maxLength;
             List<TreeFractalPoint> res = new List<TreeFractalPoint>();
@@ -266,17 +245,16 @@ namespace Fractal
             float curAngle = l.InitialAngle;
             Stack<((float X, float Y) p, float angle, int depth)> stateStack = new Stack<((float X, float Y) p, float angle, int depth)>();
 
-            string s = GetFractalString(l.InitialAxiom, l.Depth, l.Rules);
-            int maxDepth = l.Depth; 
+            string s = GetFractalString(l.InitialAxiom, maxDepth, l.Rules);
             int depth = 0;
 
             int cnt = 0;
-            int deviation = (int)(l.DeviationProportion * l.Angle);
+            int deviation = (int)(deviationProportion * l.Angle);
 
             foreach (char c in s)
             {
-                if (c == '+') curAngle += l.Angle - r.Next(0, deviation);//r.Next((int)l.Angle);//
-                else if (c == '-') curAngle -= l.Angle - r.Next(0, deviation);//r.Next((int)l.Angle);//
+                if (c == '+') curAngle += l.Angle - r.Next(0, deviation);
+                else if (c == '-') curAngle -= l.Angle - r.Next(0, deviation);
                 else if (c == '[') stateStack.Push((curPoint, curAngle, depth));
                 else if (c == ']')
                 {
