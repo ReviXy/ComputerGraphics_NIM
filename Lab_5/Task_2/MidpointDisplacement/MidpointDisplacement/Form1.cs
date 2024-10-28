@@ -17,7 +17,7 @@ namespace MidpointDisplacement
         Graphics g;
         Random rand;
 
-        double r = 0.2;
+        double r = 0;
 
         public Form1()
         {

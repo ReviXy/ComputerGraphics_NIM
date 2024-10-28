@@ -18,8 +18,6 @@ namespace Fractal
             public string InitialAxiom;
             public float InitialAngle;
             public float Angle;
-            //public int Depth;
-            //public float DeviationProportion;
             public Dictionary<char, string> Rules;
 
             public L_System(string InitialAxiom, float InitialAngle, float Angle, Dictionary<char, string> Rules)
@@ -27,8 +25,6 @@ namespace Fractal
                 this.InitialAxiom = InitialAxiom;
                 this.InitialAngle = InitialAngle;
                 this.Angle = Angle;
-                //this.Depth = 0;
-                //this.DeviationProportion = 0;
                 this.Rules = Rules;
             }
 
@@ -43,8 +39,6 @@ namespace Fractal
             l_System.InitialAxiom = s[0];
             l_System.InitialAngle = float.Parse(s[1]);
             l_System.Angle = float.Parse(s[2]);
-            //l_System.Depth = int.Parse(s[3]);
-            //l_System.DeviationProportion = float.Parse(s[4]);
 
             Dictionary<char, string> rules = new Dictionary<char, string>();
             for (int i = 1; i < file.Length; i++)
@@ -70,17 +64,15 @@ namespace Fractal
             g = Graphics.FromImage(pictureBox1.Image);
             pen = new Pen(Color.Black);
 
-            Dictionary<char, string> rules = new Dictionary<char, string>();
-
-            //L_System l_system = Read_L_System("island.txt");
-            //int depth = 3;
+            //L_System l_system = Read_L_System("gosper.txt");
+            //int depth = 5;
             //float deviationProportion = 0;
             //List<FractalPoint> fractal = GetFractal(l_system, depth, deviationProportion);
             //DrawFractal(fractal, this.Width, this.Height, 200);
 
             L_System l_system = Read_L_System("tree.txt");
-            int depth = 11;
-            float deviationProportion = 0.8f;
+            int depth = 14;
+            float deviationProportion = 1f;
             List<TreeFractalPoint> fractal = GetTreeFractal(l_system, depth, deviationProportion, 1, 20);
             DrawTreeFractal(fractal, this.Width, this.Height, 200, 2, 10, Color.SaddleBrown, Color.LimeGreen);
         }
@@ -141,7 +133,8 @@ namespace Fractal
             }
 
             for (int i = 0; i < points.Count - 1; i++)
-                if (!points[i + 1].Flag) g.DrawLine(pen, points[i].X, points[i].Y, points[i + 1].X, points[i + 1].Y);
+                if (!points[i + 1].Flag)
+                    g.DrawLine(pen, points[i].X, points[i].Y, points[i + 1].X, points[i + 1].Y);
 
         }
 
@@ -156,7 +149,6 @@ namespace Fractal
             Stack<((float X, float Y) p, float angle)> stateStack = new Stack<((float X, float Y) p, float angle)>();
 
             string s = GetFractalString(l.InitialAxiom, maxDepth, l.Rules);
-            int cnt = 0;
             int deviation = (int)(deviationProportion * l.Angle);
             
             foreach (char c in s)
@@ -173,16 +165,11 @@ namespace Fractal
 
                 if (char.IsUpper(c))
                 {
-                    if (cnt % 2 == 0)
-                    {
-                        float x = (float)(curPoint.X + length * Math.Cos(curAngle * Math.PI / 180));
-                        float y = (float)(curPoint.Y + length * Math.Sin(curAngle * Math.PI / 180));
-                        res.Add(new FractalPoint(x, y, false));
-                        curPoint = (x, y);
-                    }
-                    cnt++;
+                    float x = (float)(curPoint.X + length * Math.Cos(curAngle * Math.PI / 180));
+                    float y = (float)(curPoint.Y + length * Math.Sin(curAngle * Math.PI / 180));
+                    res.Add(new FractalPoint(x, y, false));
+                    curPoint = (x, y);
                 }
-                else cnt = 0;
             }
 
             return res;
@@ -248,7 +235,6 @@ namespace Fractal
             string s = GetFractalString(l.InitialAxiom, maxDepth, l.Rules);
             int depth = 0;
 
-            int cnt = 0;
             int deviation = (int)(deviationProportion * l.Angle);
 
             foreach (char c in s)
@@ -273,16 +259,11 @@ namespace Fractal
 
                 if (char.IsUpper(c))
                 {
-                    if (cnt % 2 == 0)
-                    {
-                        float x = (float)(curPoint.X + length * Math.Cos(curAngle * Math.PI / 180));
-                        float y = (float)(curPoint.Y + length * Math.Sin(curAngle * Math.PI / 180));
-                        res.Add(new TreeFractalPoint(x, y, depth, false));
-                        curPoint = (x, y);
-                    }
-                    cnt++;
+                    float x = (float)(curPoint.X + length * Math.Cos(curAngle * Math.PI / 180));
+                    float y = (float)(curPoint.Y + length * Math.Sin(curAngle * Math.PI / 180));
+                    res.Add(new TreeFractalPoint(x, y, depth, false));
+                    curPoint = (x, y);
                 }
-                else cnt = 0;
             }
 
             return res;

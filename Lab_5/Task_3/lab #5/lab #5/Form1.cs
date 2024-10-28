@@ -22,7 +22,7 @@ namespace lab__5
             pictureBox1.Image = bm;
             g = Graphics.FromImage(pictureBox1.Image);
         }
-        private void Task3Form_Load(object sender, EventArgs e) { }
+
         private void Clear()
         {
             points.Clear();
@@ -65,7 +65,7 @@ namespace lab__5
             if (isDragging && MovingPointIndex!=-1)
             {
                 //pointsHelp[SelectedPointIndex] = e.Location;
-                points[SelectedPointIndex] = e.Location;
+                points[MovingPointIndex] = e.Location;
                 Redraw();
             }
         }
@@ -119,7 +119,7 @@ namespace lab__5
         {
             for (int i = 0; i < points.Count; i++)
             {
-                    g.FillRectangle(Brushes.Red, points[i].X - PointRadius, points[i].Y - PointRadius, PointRadius * 2, PointRadius * 2);
+                g.FillRectangle(Brushes.Red, points[i].X - PointRadius, points[i].Y - PointRadius, PointRadius * 2, PointRadius * 2);
             }
         }
 
