@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -34,74 +35,25 @@ namespace WindowsFormsApp1
 
             camera = new Camera();
 
-            Tetrahedron(ref obj, 50);
+            //Tetrahedron(ref obj, 50);
 
-            obj.Vertexes = obj.Vertexes.Select(p => TranslatePoint(p, 0, 0, 100)).ToList();
+            obj = Object3D.Load_obj("test.obj");
+
+            Func<float, float, float> f1 = (x, y) => { float r = x * x + y * y; return (float)(Math.Cos(r) / (r + 1)); };
+            Func<float, float, float> f2 = (x, y) => { return (x * x + y * y); };
+
+            //Graph(ref obj, f1, -10, 10, -10, 10, 60);
+            //Graph(ref obj, f2, -1, 1, -1, 1, 60);
+
+            //List<Point3D> test = new List<Point3D>{ new Point3D(5,0,0), new Point3D(5, 10, 0), new Point3D(11, 0, 0) };
+            //RotationFigure(ref obj, test, Axis.Y, 20);
 
             DrawObject(obj);
         }
 
-        public void DrawObject_Axonometric(Object3D obj)
-        {
-            List<Point3D> vertexes = obj.Vertexes;
-
-            vertexes = vertexes.Select(p => View(p, camera)).ToList();
-
-            vertexes = vertexes.Select(p => Axonometric(p)).ToList();
-
-            foreach (Point3D p in vertexes)
-            {
-                g.DrawRectangle(new Pen(Color.Red), p.X - 1, p.Y - 1, 2, 2);
-            }
-
-            foreach (Face face in obj.Faces)
-            {
-                for (int i = 0; i < face.VertexIndexes.Count; i++)
-                {
-                    Point3D p1 = vertexes[face.VertexIndexes[i]];
-                    Point3D p2 = vertexes[face.VertexIndexes[(i + 1) % face.VertexIndexes.Count]];
-                    g.DrawLine(new Pen(Color.Black),
-                        p1.X,
-                        p1.Y,
-                        p2.X,
-                        p2.Y);
-
-                }
-            }
-        }
-
-        public void DrawObject_Perspective(Object3D obj)
-        {
-            List<Point3D> vertexes = obj.Vertexes;
-
-            vertexes = vertexes.Select(p => View(p, camera)).ToList();
-
-            vertexes = vertexes.Select(p => Perspective(p)).ToList();
-
-            foreach (Point3D p in vertexes)
-            {
-                g.DrawRectangle(new Pen(Color.Red), p.X - 1, p.Y - 1, 2, 2);
-            }
-
-            foreach (Face face in obj.Faces)
-            {
-                for (int i = 0; i < face.VertexIndexes.Count; i++)
-                {
-                    Point3D p1 = vertexes[face.VertexIndexes[i]];
-                    Point3D p2 = vertexes[face.VertexIndexes[(i + 1) % face.VertexIndexes.Count]];
-                    g.DrawLine(new Pen(Color.Black),
-                        p1.X,
-                        p1.Y,
-                        p2.X,
-                        p2.Y);
-
-                }
-            }
-        }
-
         public void DrawObject(Object3D obj)
         {
-            List<Point3D> vertexes = obj.Vertexes;
+            List<Point3D> vertexes = obj.Vertices;
 
             vertexes = vertexes.Select(p => View(p, camera)).ToList();
 
@@ -115,10 +67,10 @@ namespace WindowsFormsApp1
 
             foreach (Face face in obj.Faces)
             {
-                for (int i = 0; i < face.VertexIndexes.Count; i++)
+                for (int i = 0; i < face.FaceIndices.Count; i++)
                 {
-                    Point3D p1 = vertexes[face.VertexIndexes[i]];
-                    Point3D p2 = vertexes[face.VertexIndexes[(i + 1) % face.VertexIndexes.Count]];
+                    Point3D p1 = vertexes[face.FaceIndices[i].VertexIndex - 1];
+                    Point3D p2 = vertexes[face.FaceIndices[(i + 1) % face.FaceIndices.Count].VertexIndex - 1];
                     g.DrawLine(new Pen(Color.Black),
                         p1.X,
                         p1.Y,
@@ -143,7 +95,7 @@ namespace WindowsFormsApp1
 
         public Point3D Perspective(Point3D p)
         {
-            float c = -pictureBox.Width * 0.8f;
+            float c = -pictureBox.Width * 1f;
 
             float[][] PerspectiveMatrix = new float[4][]
             {
@@ -176,13 +128,13 @@ namespace WindowsFormsApp1
         public void Scale(ref Object3D obj, float mx, float my, float mz)
         {
             Point3D center = new Point3D(0, 0, 0);
-            foreach(Point3D p in obj.Vertexes)
+            foreach(Point3D p in obj.Vertices)
                 center += p;
-            center /= obj.Vertexes.Count;
+            center /= obj.Vertices.Count;
 
-            obj.Vertexes = obj.Vertexes.Select(p => TranslatePoint(p, -center.X, -center.Y, -center.Z)).ToList();
-            obj.Vertexes = obj.Vertexes.Select(p => ScalePoint(p, mx, my, mz)).ToList();
-            obj.Vertexes = obj.Vertexes.Select(p => TranslatePoint(p, center.X, center.Y, center.Z)).ToList();
+            obj.Vertices = obj.Vertices.Select(p => TranslatePoint(p, -center.X, -center.Y, -center.Z)).ToList();
+            obj.Vertices = obj.Vertices.Select(p => ScalePoint(p, mx, my, mz)).ToList();
+            obj.Vertices = obj.Vertices.Select(p => TranslatePoint(p, center.X, center.Y, center.Z)).ToList();
         }
 
         public void Rotate(ref Object3D obj, Point3D a, Point3D b, float angle)
@@ -206,43 +158,43 @@ namespace WindowsFormsApp1
                     new float[4] { 0,                       0,                          0,                          1 }
             };
 
-            obj.Vertexes = obj.Vertexes.Select(p => MultiplyMatrix(RotateMatrix, p)).ToList();
+            obj.Vertices = obj.Vertices.Select(p => MultiplyMatrix(RotateMatrix, p)).ToList();
         }
 
         public void XRotate(ref Object3D obj, float angle)
         {
             Point3D center = new Point3D(0, 0, 0);
-            foreach (Point3D p in obj.Vertexes)
+            foreach (Point3D p in obj.Vertices)
                 center += p;
-            center /= obj.Vertexes.Count;
+            center /= obj.Vertices.Count;
 
-            obj.Vertexes = obj.Vertexes.Select(p => TranslatePoint(p, -center.X, -center.Y, -center.Z)).ToList();
-            obj.Vertexes = obj.Vertexes.Select(p => XRotatePoint(p, angle)).ToList();
-            obj.Vertexes = obj.Vertexes.Select(p => TranslatePoint(p, center.X, center.Y, center.Z)).ToList();
+            obj.Vertices = obj.Vertices.Select(p => TranslatePoint(p, -center.X, -center.Y, -center.Z)).ToList();
+            obj.Vertices = obj.Vertices.Select(p => XRotatePoint(p, angle)).ToList();
+            obj.Vertices = obj.Vertices.Select(p => TranslatePoint(p, center.X, center.Y, center.Z)).ToList();
         }
 
         public void YRotate(ref Object3D obj, float angle)
         {
             Point3D center = new Point3D(0, 0, 0);
-            foreach (Point3D p in obj.Vertexes)
+            foreach (Point3D p in obj.Vertices)
                 center += p;
-            center /= obj.Vertexes.Count;
+            center /= obj.Vertices.Count;
 
-            obj.Vertexes = obj.Vertexes.Select(p => TranslatePoint(p, -center.X, -center.Y, -center.Z)).ToList();
-            obj.Vertexes = obj.Vertexes.Select(p => YRotatePoint(p, angle)).ToList();
-            obj.Vertexes = obj.Vertexes.Select(p => TranslatePoint(p, center.X, center.Y, center.Z)).ToList();
+            obj.Vertices = obj.Vertices.Select(p => TranslatePoint(p, -center.X, -center.Y, -center.Z)).ToList();
+            obj.Vertices = obj.Vertices.Select(p => YRotatePoint(p, angle)).ToList();
+            obj.Vertices = obj.Vertices.Select(p => TranslatePoint(p, center.X, center.Y, center.Z)).ToList();
         }
 
         public void ZRotate(ref Object3D obj, float angle)
         {
             Point3D center = new Point3D(0, 0, 0);
-            foreach (Point3D p in obj.Vertexes)
+            foreach (Point3D p in obj.Vertices)
                 center += p;
-            center /= obj.Vertexes.Count;
+            center /= obj.Vertices.Count;
 
-            obj.Vertexes = obj.Vertexes.Select(p => TranslatePoint(p, -center.X, -center.Y, -center.Z)).ToList();
-            obj.Vertexes = obj.Vertexes.Select(p => ZRotatePoint(p, angle)).ToList();
-            obj.Vertexes = obj.Vertexes.Select(p => TranslatePoint(p, center.X, center.Y, center.Z)).ToList();
+            obj.Vertices = obj.Vertices.Select(p => TranslatePoint(p, -center.X, -center.Y, -center.Z)).ToList();
+            obj.Vertices = obj.Vertices.Select(p => ZRotatePoint(p, angle)).ToList();
+            obj.Vertices = obj.Vertices.Select(p => TranslatePoint(p, center.X, center.Y, center.Z)).ToList();
         }
 
         public Point3D XYMirrorPoint(Point3D p)
@@ -371,31 +323,31 @@ namespace WindowsFormsApp1
             foreach (Face f in temp.Faces)
             {
                 Point3D sum = new Point3D(0, 0, 0);
-                foreach (int i in f.VertexIndexes)
+                foreach (FaceIndices i in f.FaceIndices)
                 {
-                    sum += temp.Vertexes[i];
+                    sum += temp.Vertices[i.VertexIndex];
                 }
-                obj.Vertexes.Add(new Point3D(a * sum.X / 3, a * sum.Y / 3, a * sum.Z / 3));
+                obj.Vertices.Add(new Point3D(a * sum.X / 3, a * sum.Y / 3, a * sum.Z / 3));
             }
 
-            float k = a / (float)Math.Sqrt(Math.Pow(obj.Vertexes[0].X - obj.Vertexes[1].X, 2) + Math.Pow(obj.Vertexes[0].Y - obj.Vertexes[1].Y, 2) + Math.Pow(obj.Vertexes[0].Z - obj.Vertexes[1].Z, 2));
-            for (int i = 0; i < obj.Vertexes.Count; i++)
-                obj.Vertexes[i] = obj.Vertexes[i] * k;
+            float k = a / (float)Math.Sqrt(Math.Pow(obj.Vertices[0].X - obj.Vertices[1].X, 2) + Math.Pow(obj.Vertices[0].Y - obj.Vertices[1].Y, 2) + Math.Pow(obj.Vertices[0].Z - obj.Vertices[1].Z, 2));
+            for (int i = 0; i < obj.Vertices.Count; i++)
+                obj.Vertices[i] = obj.Vertices[i] * k;
 
-            obj.Faces.Add(new Face(0, 1, 2, 3, 4));
-            obj.Faces.Add(new Face(5, 6, 7, 8, 9));
+            obj.Faces.Add(new Face(1, 2, 3, 4, 5));
+            obj.Faces.Add(new Face(6, 7, 8, 9, 10));
 
-            obj.Faces.Add(new Face(0, 1, 12, 11, 10));
-            obj.Faces.Add(new Face(1, 2, 14, 13, 12));
-            obj.Faces.Add(new Face(2, 3, 16, 15, 14));
-            obj.Faces.Add(new Face(3, 4, 18, 17, 16));
-            obj.Faces.Add(new Face(4, 0, 10, 19, 18));
+            obj.Faces.Add(new Face(1, 2, 13, 12, 11));
+            obj.Faces.Add(new Face(2, 3, 15, 14, 13));
+            obj.Faces.Add(new Face(3, 4, 17, 16, 15));
+            obj.Faces.Add(new Face(4, 5, 19, 18, 17));
+            obj.Faces.Add(new Face(5, 1, 11, 20, 19));
 
-            obj.Faces.Add(new Face(5, 6, 13, 12, 11));
-            obj.Faces.Add(new Face(6, 7, 15, 14, 13));
-            obj.Faces.Add(new Face(7, 8, 17, 16, 15));
-            obj.Faces.Add(new Face(8, 9, 19, 18, 17));
-            obj.Faces.Add(new Face(9, 5, 11, 10, 19));
+            obj.Faces.Add(new Face(6, 7, 14, 13, 12));
+            obj.Faces.Add(new Face(7, 8, 16, 15, 14));
+            obj.Faces.Add(new Face(8, 9, 18, 17, 16));
+            obj.Faces.Add(new Face(9, 10, 20, 19, 18));
+            obj.Faces.Add(new Face(10, 6, 12, 11, 20));
 
         }
 
@@ -408,40 +360,40 @@ namespace WindowsFormsApp1
 
             obj = new Object3D();
 
-            obj.Vertexes.Add(new Point3D(0, 0, R));
+            obj.Vertices.Add(new Point3D(0, 0, R));
             for (float angle = 0; angle < 360; angle += step)
             {
-                obj.Vertexes.Add(new Point3D(R * (float)Math.Cos(angle / 180D * Math.PI), R * (float)Math.Sin(angle / 180D * Math.PI), a / 2));
+                obj.Vertices.Add(new Point3D(R * (float)Math.Cos(angle / 180D * Math.PI), R * (float)Math.Sin(angle / 180D * Math.PI), a / 2));
             }
 
-            obj.Vertexes.Add(new Point3D(0, 0, -R));
+            obj.Vertices.Add(new Point3D(0, 0, -R));
             for (float angle = step / 2; angle < 360; angle += step)
             {
-                obj.Vertexes.Add(new Point3D(R * (float)Math.Cos(angle / 180D * Math.PI), R * (float)Math.Sin(angle / 180D * Math.PI), -a / 2));
+                obj.Vertices.Add(new Point3D(R * (float)Math.Cos(angle / 180D * Math.PI), R * (float)Math.Sin(angle / 180D * Math.PI), -a / 2));
             }
 
-            obj.Faces.Add(new Face(0, 1, 2));
-            obj.Faces.Add(new Face(0, 2, 3));
-            obj.Faces.Add(new Face(0, 3, 4));
-            obj.Faces.Add(new Face(0, 4, 5));
-            obj.Faces.Add(new Face(0, 5, 1));
+            obj.Faces.Add(new Face(1, 2, 3));
+            obj.Faces.Add(new Face(1, 3, 4));
+            obj.Faces.Add(new Face(1, 4, 5));
+            obj.Faces.Add(new Face(1, 5, 6));
+            obj.Faces.Add(new Face(1, 6, 2));
 
-            obj.Faces.Add(new Face(6, 7, 8));
-            obj.Faces.Add(new Face(6, 8, 9));
-            obj.Faces.Add(new Face(6, 9, 10));
-            obj.Faces.Add(new Face(6, 10, 11));
-            obj.Faces.Add(new Face(6, 11, 7));
+            obj.Faces.Add(new Face(7, 8, 9));
+            obj.Faces.Add(new Face(7, 9, 10));
+            obj.Faces.Add(new Face(7, 10, 11));
+            obj.Faces.Add(new Face(7, 11, 12));
+            obj.Faces.Add(new Face(7, 12, 8));
 
-            obj.Faces.Add(new Face(1, 2, 7));
-            obj.Faces.Add(new Face(7, 8, 2));
             obj.Faces.Add(new Face(2, 3, 8));
             obj.Faces.Add(new Face(8, 9, 3));
             obj.Faces.Add(new Face(3, 4, 9));
             obj.Faces.Add(new Face(9, 10, 4));
             obj.Faces.Add(new Face(4, 5, 10));
             obj.Faces.Add(new Face(10, 11, 5));
-            obj.Faces.Add(new Face(5, 1, 11));
-            obj.Faces.Add(new Face(11, 7, 1));
+            obj.Faces.Add(new Face(5, 6, 11));
+            obj.Faces.Add(new Face(11, 12, 6));
+            obj.Faces.Add(new Face(6, 2, 12));
+            obj.Faces.Add(new Face(12, 8, 2));
 
         }
 
@@ -452,21 +404,21 @@ namespace WindowsFormsApp1
 
             obj = new Object3D();
 
-            obj.Vertexes.Add(new Point3D(r, r, -r));
-            obj.Vertexes.Add(new Point3D(-r, r, -r));
-            obj.Vertexes.Add(new Point3D(-r, -r, -r));
-            obj.Vertexes.Add(new Point3D(r, -r, -r));
-            obj.Vertexes.Add(new Point3D(r, r, r));
-            obj.Vertexes.Add(new Point3D(-r, r, r));
-            obj.Vertexes.Add(new Point3D(-r, -r, r));
-            obj.Vertexes.Add(new Point3D(r, -r, r));
+            obj.Vertices.Add(new Point3D(r, r, -r));
+            obj.Vertices.Add(new Point3D(-r, r, -r));
+            obj.Vertices.Add(new Point3D(-r, -r, -r));
+            obj.Vertices.Add(new Point3D(r, -r, -r));
+            obj.Vertices.Add(new Point3D(r, r, r));
+            obj.Vertices.Add(new Point3D(-r, r, r));
+            obj.Vertices.Add(new Point3D(-r, -r, r));
+            obj.Vertices.Add(new Point3D(r, -r, r));
 
-            obj.Faces.Add(new Face(0, 1, 2, 3));
-            obj.Faces.Add(new Face(4, 5, 6, 7));
-            obj.Faces.Add(new Face(0, 1, 5, 4));
+            obj.Faces.Add(new Face(1, 2, 3, 4));
+            obj.Faces.Add(new Face(5, 6, 7, 8));
             obj.Faces.Add(new Face(1, 2, 6, 5));
             obj.Faces.Add(new Face(2, 3, 7, 6));
-            obj.Faces.Add(new Face(0, 3, 7, 4));
+            obj.Faces.Add(new Face(3, 4, 8, 7));
+            obj.Faces.Add(new Face(1, 4, 8, 5));
         }
 
         public void Tetrahedron(ref Object3D obj, float a)
@@ -476,15 +428,72 @@ namespace WindowsFormsApp1
 
             obj = new Object3D();
 
-            obj.Vertexes.Add(new Point3D(0, 0, R));
-            obj.Vertexes.Add(new Point3D(R, 0, -r));
-            obj.Vertexes.Add(new Point3D(-r, a / 2, -r));
-            obj.Vertexes.Add(new Point3D(-r, -a / 2, -r));
+            obj.Vertices.Add(new Point3D(0, 0, R));
+            obj.Vertices.Add(new Point3D(R, 0, -r));
+            obj.Vertices.Add(new Point3D(-r, a / 2, -r));
+            obj.Vertices.Add(new Point3D(-r, -a / 2, -r));
 
-            obj.Faces.Add(new Face(0, 1, 2));
-            obj.Faces.Add(new Face(0, 2, 3));
-            obj.Faces.Add(new Face(0, 1, 3));
             obj.Faces.Add(new Face(1, 2, 3));
+            obj.Faces.Add(new Face(1, 3, 4));
+            obj.Faces.Add(new Face(1, 2, 4));
+            obj.Faces.Add(new Face(2, 3, 4));
+        }
+
+        public void Graph(ref Object3D obj, Func<float, float, float> f, float minx, float maxx, float miny, float maxy, int splits)
+        {
+            obj = new Object3D();
+
+            float stepx = (maxx - minx) / splits;
+            float stepy = (maxy - miny) / splits;
+
+            for (int y = 0; y < splits; y++)
+            {
+                for (int x = 0; x < splits; x++)
+                {
+                    float x1 = minx + x * stepx;
+                    float y1 = miny + y * stepy;
+
+                    obj.Vertices.Add(new Point3D(x1, y1, f(x1, y1)));
+
+                    if (x != 0 && y != 0)
+                    {
+                        int cur = y * splits + x + 1;
+                        obj.Faces.Add(new Face(cur, cur - splits, cur - splits - 1, cur - 1));
+                    }
+                }
+            }
+        }
+
+        public void RotationFigure(ref Object3D obj, List<Point3D> points, Axis axis, int splits)
+        {
+            obj = new Object3D();
+
+            float step = 360 / splits;
+            for (int i = 0; i <= splits; i++)
+            {
+                foreach(Point3D p in points)
+                {
+                    Point3D newP;
+                    switch (axis) {
+                        case Axis.X: newP = XRotatePoint(p, i * step); break;
+                        case Axis.Y: newP = YRotatePoint(p, i * step); break;
+                        case Axis.Z: newP = ZRotatePoint(p, i * step); break;
+                        default: newP = new Point3D(0,0,0); break;
+                    }
+                    obj.Vertices.Add(newP);
+                }
+                if (i != 0)
+                {
+                    for (int j = 0; j < points.Count; j++)
+                    {
+                        obj.Faces.Add(new Face(
+                            i * points.Count + j + 1,
+                            i * points.Count + (j + 1) % points.Count + 1,
+                            (i - 1) * points.Count + (j + 1) % points.Count + 1,
+                            (i - 1) * points.Count + j % points.Count + 1));
+                    }
+                }
+            }
         }
 
         private void radioButton1_CheckedChanged(object sender, EventArgs e)
@@ -502,7 +511,7 @@ namespace WindowsFormsApp1
             float dx, dy, dz;
             if (float.TryParse(textBox1.Text, out dx) && float.TryParse(textBox2.Text, out dy) && float.TryParse(textBox3.Text, out dz))
             {
-                obj.Vertexes = obj.Vertexes.Select(p => TranslatePoint(p, dx, dy, dz)).ToList();
+                obj.Vertices = obj.Vertices.Select(p => TranslatePoint(p, dx, dy, dz)).ToList();
 
                 g.Clear(Color.White);
                 DrawObject(obj);
@@ -515,9 +524,9 @@ namespace WindowsFormsApp1
             float angle;
             if (float.TryParse(textBox4.Text, out angle))
             {
-                if (radioButton3.Checked) obj.Vertexes = obj.Vertexes.Select(p => XRotatePoint(p, angle)).ToList();
-                if (radioButton4.Checked) obj.Vertexes = obj.Vertexes.Select(p => YRotatePoint(p, angle)).ToList();
-                if (radioButton5.Checked) obj.Vertexes = obj.Vertexes.Select(p => ZRotatePoint(p, angle)).ToList();
+                if (radioButton3.Checked) obj.Vertices = obj.Vertices.Select(p => XRotatePoint(p, angle)).ToList();
+                if (radioButton4.Checked) obj.Vertices = obj.Vertices.Select(p => YRotatePoint(p, angle)).ToList();
+                if (radioButton5.Checked) obj.Vertices = obj.Vertices.Select(p => ZRotatePoint(p, angle)).ToList();
 
                 g.Clear(Color.White);
                 DrawObject(obj);
@@ -531,7 +540,7 @@ namespace WindowsFormsApp1
             float mx, my, mz;
             if (float.TryParse(textBox5.Text, out mx) && float.TryParse(textBox6.Text, out my) && float.TryParse(textBox7.Text, out mz))
             {
-                obj.Vertexes = obj.Vertexes.Select(p => ScalePoint(p, mx, my, mz)).ToList();
+                obj.Vertices = obj.Vertices.Select(p => ScalePoint(p, mx, my, mz)).ToList();
 
                 g.Clear(Color.White);
                 DrawObject(obj);
@@ -541,9 +550,9 @@ namespace WindowsFormsApp1
 
         private void button4_Click(object sender, EventArgs e)
         {
-            if (radioButton6.Checked) obj.Vertexes = obj.Vertexes.Select(p => XYMirrorPoint(p)).ToList();
-            if (radioButton7.Checked) obj.Vertexes = obj.Vertexes.Select(p => XZMirrorPoint(p)).ToList();
-            if (radioButton8.Checked) obj.Vertexes = obj.Vertexes.Select(p => YZMirrorPoint(p)).ToList();
+            if (radioButton6.Checked) obj.Vertices = obj.Vertices.Select(p => XYMirrorPoint(p)).ToList();
+            if (radioButton7.Checked) obj.Vertices = obj.Vertices.Select(p => XZMirrorPoint(p)).ToList();
+            if (radioButton8.Checked) obj.Vertices = obj.Vertices.Select(p => YZMirrorPoint(p)).ToList();
 
             g.Clear(Color.White);
             DrawObject(obj);
@@ -592,6 +601,33 @@ namespace WindowsFormsApp1
                 pictureBox.Refresh();
             }
         }
+
+        private void save_button_Click(object sender, EventArgs e)
+        {
+            if (textBox19.Text.Length != 0)
+            {
+                StringBuilder sb = new StringBuilder();
+                foreach(Point3D v in obj.Vertices)
+                {
+                    sb.AppendLine($"v {v.X} {v.Y} {v.Z}");
+                }
+
+                foreach (Face f in obj.Faces)
+                {
+                    sb.Append("f");
+                    foreach (FaceIndices fi in f.FaceIndices)
+                        sb.Append($" {fi.VertexIndex}/{fi.TextureCoordinateIndex}/{fi.NormalIndex}");
+                    sb.AppendLine("");
+                }
+
+                File.WriteAllText(textBox19.Text + ".obj", sb.ToString());
+            }
+        }
+    }
+
+    public enum Axis
+    {
+        X, Y, Z
     }
 
     public class Point3D
@@ -616,25 +652,124 @@ namespace WindowsFormsApp1
 
     public class Face
     {
-        public List<int> VertexIndexes;
+        public List<FaceIndices> FaceIndices;
+
+        public Face()
+        {
+            FaceIndices = new List<FaceIndices>();
+        }
 
         public Face(params int[] indexes)
         {
-            VertexIndexes = new List<int>();
+            FaceIndices = new List<FaceIndices>();
             foreach(int i in indexes)
-                VertexIndexes.Add(i);
+                FaceIndices.Add(new FaceIndices(i));
+        }
+    }
+
+    public class FaceIndices
+    {
+        public int VertexIndex { get; set; }
+        public int TextureCoordinateIndex { get; set; }
+        public int NormalIndex { get; set; }
+
+        public FaceIndices(int v)
+        {
+            VertexIndex = v;
+            TextureCoordinateIndex = v;
+            NormalIndex = v;
+        }
+
+        public FaceIndices(int v, int vt, int vn)
+        {
+            VertexIndex = v;
+            TextureCoordinateIndex = vt;
+            NormalIndex = vn;
+        }
+    }
+
+    public class Coordinates
+    {
+        public float U { get; set; }
+        public float V { get; set; }
+        public float W { get; set; }
+
+        public Coordinates(float u, float v = 0, float w = 0)
+        {
+            U = u;
+            V = v; W = w;
         }
     }
 
     public class Object3D
     {
-        public List<Point3D> Vertexes;
+        public List<Point3D> Vertices;
         public List<Face> Faces;
+        public List<Point3D> Normals;
+        public List<Coordinates> TextureCoordinates;
+        public List<Coordinates> ParameterSpaceVertices;
 
         public Object3D()
         {
-            Vertexes = new List<Point3D>();
+            Vertices = new List<Point3D>();
             Faces = new List<Face>();
+            Normals = new List<Point3D>();
+            TextureCoordinates = new List<Coordinates>();
+            ParameterSpaceVertices = new List<Coordinates>();
+        }
+
+        public static Object3D Load_obj(string fname)
+        {
+            string[] file = File.ReadAllLines(fname);
+            Object3D res = new Object3D();
+
+            foreach (string s in file)
+            {
+                if (s == "" || s.Substring(0, 1) == "#" || s.Substring(0, 1) == "o" || (s.Length == 1 && s[0] != 'v' && s[0] != 'f')) continue;
+                
+                if (s.Substring(0, 2) == "vt")
+                {
+                    float[] parsed = s.Substring(3, s.Length - 3).Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Select(x => float.Parse(x)).ToArray();
+                    res.TextureCoordinates.Add(new Coordinates(parsed[0], parsed.Length < 2 ? 0 : parsed[1], parsed.Length < 3 ? 0 : parsed[2]));
+                }
+                else if (s.Substring(0, 2) == "vn")
+                {
+                    float[] parsed = s.Substring(3, s.Length - 3).Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Select(x => float.Parse(x)).ToArray();
+                    res.Normals.Add(new Point3D(parsed[0], parsed[1], parsed[2]));
+                }
+                else if (s.Substring(0, 2) == "vp")
+                {
+                    float[] parsed = s.Substring(3, s.Length - 3).Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Select(x => float.Parse(x)).ToArray();
+                    res.ParameterSpaceVertices.Add(new Coordinates(parsed[0], parsed.Length < 2 ? 0 : parsed[1], parsed.Length < 3 ? 0 : parsed[2]));
+                }
+                else if (s.Substring(0, 1) == "v")
+                {
+                    float[] parsed = s.Substring(2, s.Length - 2).Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Select(x => float.Parse(x)).ToArray();
+                    res.Vertices.Add(new Point3D(parsed[0], parsed[1], parsed[2], parsed.Length == 3 ? 1 : parsed[3]));
+                }
+                else if (s.Substring(0, 1) == "f")
+                {
+                    string[] parsed = s.Substring(2, s.Length - 2).Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).ToArray();
+                    Face f = new Face();
+                    foreach (string v in parsed)
+                    {
+                        string[] vertex = v.Split('/');
+                        FaceIndices faceIndices = new FaceIndices(int.Parse(vertex[0]));
+
+                        if (vertex.Length > 1 && vertex[1] != "")
+                        {
+                            faceIndices.TextureCoordinateIndex = int.Parse(vertex[1]);
+                            if (vertex.Length > 2)
+                                faceIndices.NormalIndex = int.Parse(vertex[2]);
+                        }
+
+                        f.FaceIndices.Add(faceIndices);
+                    }
+                    res.Faces.Add(f);
+                }
+                
+            }
+            return res;
         }
     }
 
@@ -653,5 +788,7 @@ namespace WindowsFormsApp1
             Location = new Point3D(0, 0, 0);
         }
     }
+
+    
 
 }
