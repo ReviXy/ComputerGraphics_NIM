@@ -54,18 +54,24 @@ namespace WindowsFormsApp1
 
             //Tetrahedron(ref obj, 50);
 
+            //Object3D toilet = Object3D.Load_obj("toilet.obj");
+            //toilet.color1 = Color.Blue;
+            //toilet.color2 = Color.Red;
+            //Triangulate(ref toilet);
+            //objects.Add(toilet);
+            //objectDropDown.Items.Add("toilet");
+
 
             Object3D cube1 = Object3D.Load_obj("cube.obj");
+            cube1.color1 = Color.Blue;
+            cube1.color2 = Color.Red;
             Triangulate(ref cube1);
             objects.Add(cube1);
             objectDropDown.Items.Add("cube1");
 
-            //Object3D cube2 = Object3D.Load_obj("cube.obj");
-            //Triangulate(ref cube2);
-            //objects.Add(cube2);
-            //objectDropDown.Items.Add("cube2");
-
             Object3D teapot = Object3D.Load_obj("teapot.obj");
+            teapot.color1 = Color.Green;
+            teapot.color2 = Color.Purple;
             Triangulate(ref teapot);
             objects.Add(teapot);
             objectDropDown.Items.Add("Teapot2");
@@ -172,7 +178,7 @@ namespace WindowsFormsApp1
                 
 
                 List<Point3D> points = face.FaceIndices.Select(i => vertexes[i.VertexIndex - 1]).ToList();
-                Rasterization(points);
+                Rasterization(points, obj.color1, obj.color2);
 
 
                 //for (int i = 0; i < face.FaceIndices.Count; i++)
@@ -193,12 +199,14 @@ namespace WindowsFormsApp1
             return (int)Math.Round(y0 + (float)(y1 - y0) * (x - x0) / (x1 - x0));
         }
 
-        void Rasterization(List<Point3D> points)
+        void Rasterization(List<Point3D> points, Color color1, Color color2)
         {
             points = points.Select(p => new Point3D((float)Math.Round(p.X), (float)Math.Round(p.Y), p.Z, p.W)).ToList();
             points.Sort((a, b) => a.Y == b.Y ? 0 : (a.Y < b.Y ? -1 : 1));
 
-            List<int> colors = points.Select(p => Interpolation(minZ, 35, maxZ, 220, p.Z)).ToList();
+            List<Color> colors = points.Select(p => Color.FromArgb( Interpolation(minZ, color1.R, maxZ, color2.R, p.Z),
+                                                                    Interpolation(minZ, color1.G, maxZ, color2.G, p.Z),
+                                                                    Interpolation(minZ, color1.B, maxZ, color2.B, p.Z))).ToList();
 
             float inc12, inc13, inc23;
 
@@ -230,20 +238,29 @@ namespace WindowsFormsApp1
 
             for (int i = (int)(points[0].Y); i < (int)(points[1].Y); i++)
             {
-                int cLeft = Interpolation(points[0].Y, colors[0], points[left].Y, colors[left], i);
-                int cRight = Interpolation(points[0].Y, colors[0], points[right].Y, colors[right], i);
+                int cLeftR = Interpolation(points[0].Y, colors[0].R, points[left].Y, colors[left].R, i);
+                int cLeftG = Interpolation(points[0].Y, colors[0].G, points[left].Y, colors[left].G, i);
+                int cLeftB = Interpolation(points[0].Y, colors[0].B, points[left].Y, colors[left].B, i);
+
+                int cRightR = Interpolation(points[0].Y, colors[0].R, points[right].Y, colors[right].R, i);
+                int cRightG = Interpolation(points[0].Y, colors[0].G, points[right].Y, colors[right].G, i);
+                int cRightB = Interpolation(points[0].Y, colors[0].B, points[right].Y, colors[right].B, i);
 
                 int zLeft = Interpolation(points[0].Y, points[0].Z, points[left].Y, points[left].Z, i);
                 int zRight = Interpolation(points[0].Y, points[0].Z, points[right].Y, points[right].Z, i);
 
                 for (int j = (int)x1; j < (int)x2; j++)
                 {
-                    int b = Interpolation((int)x1, cLeft, (int)x2, cRight, j);
+                    int R = Interpolation((int)x1, cLeftR, (int)x2, cRightR, j);
+                    int G = Interpolation((int)x1, cLeftG, (int)x2, cRightG, j);
+                    int B = Interpolation((int)x1, cLeftB, (int)x2, cRightB, j);
+
                     int z = Interpolation((int)x1, zLeft, (int)x2, zRight, j);
+                    if (pictureBox.Width / 2 + j > pictureBox.Width - 1 || pictureBox.Width / 2 + j < 0 || pictureBox.Height / 2 + i > pictureBox.Height - 1 || pictureBox.Height / 2 + i < 0) continue;
                     if (ZBuffer[pictureBox.Width / 2 + j, pictureBox.Height / 2 + i] > z)
                     {
                         ZBuffer[pictureBox.Width / 2 + j, pictureBox.Height / 2 + i] = z;
-                        g.DrawRectangle(new Pen(Color.FromArgb(b, b, b)), j, i, 1, 1);
+                        g.DrawRectangle(new Pen(Color.FromArgb(R, G, B)), j, i, 1, 1);
                     }
                 }
                 x1 += inc13;
@@ -263,20 +280,29 @@ namespace WindowsFormsApp1
 
             for (int i = (int)(points[1].Y); i < (int)(points[2].Y); i++)
             {
-                int cLeft = Interpolation(points[2].Y, colors[2], points[left].Y, colors[left], i);
-                int cRight = Interpolation(points[2].Y, colors[2], points[right].Y, colors[right], i);
+                int cLeftR = Interpolation(points[2].Y, colors[2].R, points[left].Y, colors[left].R, i);
+                int cLeftG = Interpolation(points[2].Y, colors[2].G, points[left].Y, colors[left].G, i);
+                int cLeftB = Interpolation(points[2].Y, colors[2].B, points[left].Y, colors[left].B, i);
+
+                int cRightR = Interpolation(points[2].Y, colors[2].R, points[right].Y, colors[right].R, i);
+                int cRightG = Interpolation(points[2].Y, colors[2].G, points[right].Y, colors[right].G, i);
+                int cRightB = Interpolation(points[2].Y, colors[2].B, points[right].Y, colors[right].B, i);
 
                 int zLeft = Interpolation(points[2].Y, points[2].Z, points[left].Y, points[left].Z, i);
                 int zRight = Interpolation(points[2].Y, points[2].Z, points[right].Y, points[right].Z, i);
 
                 for (int j = (int)x1; j < (int)x2; j++)
                 {
-                    int b = Interpolation((int)x1, cLeft, (int)x2, cRight, j);
+                    int R = Interpolation((int)x1, cLeftR, (int)x2, cRightR, j);
+                    int G = Interpolation((int)x1, cLeftG, (int)x2, cRightG, j);
+                    int B = Interpolation((int)x1, cLeftB, (int)x2, cRightB, j);
+
                     int z = Interpolation((int)x1, zLeft, (int)x2, zRight, j);
+                    if (pictureBox.Width / 2 + j > pictureBox.Width - 1 || pictureBox.Width / 2 + j < 0 || pictureBox.Height / 2 + i > pictureBox.Height - 1 || pictureBox.Height / 2 + i < 0) continue;
                     if (ZBuffer[pictureBox.Width / 2 + j, pictureBox.Height / 2 + i] > z)
                     {
                         ZBuffer[pictureBox.Width / 2 + j, pictureBox.Height / 2 + i] = z;
-                        g.DrawRectangle(new Pen(Color.FromArgb(b, b, b)), j, i, 1, 1);
+                        g.DrawRectangle(new Pen(Color.FromArgb(R, G, B)), j, i, 1, 1);
                     }
                 }
                 x1 += _inc13;
@@ -987,7 +1013,8 @@ namespace WindowsFormsApp1
         public List<Point3D> Normals { get; set; }
         public List<Coordinates> TextureCoordinates { get; set; }
         public List<Coordinates> ParameterSpaceVertices { get; set; }
-        public Color color { get; set; }
+        public Color color1 { get; set; }
+        public Color color2 { get; set; }
 
         public Object3D()
         {
@@ -996,7 +1023,8 @@ namespace WindowsFormsApp1
             Normals = new List<Point3D>();
             TextureCoordinates = new List<Coordinates>();
             ParameterSpaceVertices = new List<Coordinates>();
-            color = Color.Gray;
+            color1 = Color.FromArgb(35, 35, 35);
+            color2 = Color.FromArgb(220, 220, 220);
         }
 
         public static Object3D Load_obj(string fname)
