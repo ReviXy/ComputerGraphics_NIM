@@ -257,7 +257,8 @@ namespace WindowsFormsApp1
                     if (ZBuffer[pictureBox.Width / 2 + j, pictureBox.Height / 2 + i] > z)
                     {
                         ZBuffer[pictureBox.Width / 2 + j, pictureBox.Height / 2 + i] = z;
-                        g.DrawRectangle(new Pen(Color.FromArgb(R, G, B)), j, i, 1, 1);
+                        //g.DrawRectangle(new Pen(Color.FromArgb(R, G, B)), j, i, 1, 1);
+                        bm.SetPixel(pictureBox.Width / 2 + j, pictureBox.Height - pictureBox.Height / 2 + i, Color.FromArgb(R, G, B));
                     }
                 }
                 x1 += inc13;
@@ -299,7 +300,8 @@ namespace WindowsFormsApp1
                     if (ZBuffer[pictureBox.Width / 2 + j, pictureBox.Height / 2 + i] > z)
                     {
                         ZBuffer[pictureBox.Width / 2 + j, pictureBox.Height / 2 + i] = z;
-                        g.DrawRectangle(new Pen(Color.FromArgb(R, G, B)), j, i, 1, 1);
+                        //g.DrawRectangle(new Pen(Color.FromArgb(R, G, B)), j, i, 1, 1);
+                        bm.SetPixel(pictureBox.Width / 2 + j, pictureBox.Height - pictureBox.Height / 2 + i, Color.FromArgb(R, G, B));
                     }
                 }
                 x1 += _inc13;
