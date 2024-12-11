@@ -42,6 +42,7 @@ enum Fill {
 
 Shape shape;
 Fill fill;
+
 std::vector<Vertex> verteces;
 Color u_color = {1, 0, 0, 1};
 std::vector<Color> gradient_colors;
@@ -273,10 +274,10 @@ std::vector<Color> GenerateColors(int n) {
 }
 
 int main() {
-    shape = Fan;
+    shape = Quadrangle;
     fill = Gradient;
 
-    u_color = {0, 0, 1, 1};
+    u_color = {1, 0, 1, 1};
 
     switch (shape)
     {
@@ -301,13 +302,16 @@ int main() {
             { 1.0f, -1.0f },
             { 0.0f, -1.0f }
         };
-        if (fill == Gradient) gradient_colors = GenerateColors(3);
+        if (fill == Gradient) gradient_colors = GenerateColors(4);
         break;
     case Pentagon:
         verteces.push_back({ 0.0f, 0.0f });
         for (GLfloat angle = 0.0f; angle <= 360.0f; angle += 72.0f)
             verteces.push_back({ cos(angle / 180.0f * Pi), sin(angle / 180.0f * Pi) });
-        if (fill == Gradient) gradient_colors = GenerateColors(5);
+        if (fill == Gradient) {
+            gradient_colors = GenerateColors(6);
+            gradient_colors.push_back(gradient_colors[1]);
+        }
         break;
     default: break;
     }
